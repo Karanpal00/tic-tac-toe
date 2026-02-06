@@ -77,7 +77,11 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
         currentPlayer = currentPlayer === players[0]? players[1] : players[0];
     }
 
-    // check valid cells
+    // get board values for the ui
+    const getBoardValues = () => {
+        board.getBoard().map(row => row.map(cell => cell.getValue()));
+    }
+    // check valid cells in the board
     const isValidCell = (row, col, boardSize) => {
         if (row >= 0 && row < boardSize && col >= 0 && col < boardSize) {
             return true;
@@ -85,13 +89,14 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
         return false;
     }
 
-    // check if the board is full
+    // check if the board is full for draw
     const isBoardFull = () => {
         return board.getBoard().every( row =>
             row.every( cell => cell.getValue() !== null)
         );
     }
 
+    // moves to feed the bot
     const movesAvailable = () => {
         const moves = [];
 
@@ -145,7 +150,7 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
         console.log(`Now ${currentPlayer.name}'s turn.`);
     }
 
-    //play the round 
+    //play the game round 
     const playRound = (row, col) => {
         if (!board.markToken(row, col, currentPlayer.token)) {
             console.log('Cannot play this move, try another one.');
@@ -164,6 +169,7 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
         log(); 
     }
 
+    //reset the game
     const reset = () => {
         board.initializeBoard();
         currentPlayer = players[0];

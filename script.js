@@ -55,7 +55,6 @@ function GameBoard(size = 3) {
         printBoard,
         markToken,
     }
-
 }
 
 // GameController function factory
@@ -76,7 +75,7 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
     // switch player
     const switchPlayer = () => {
         currentPlayer = currentPlayer === players[0]? players[1] : players[0];
-    }  
+    }
 
     // check valid cells
     const isValidCell = (row, col, boardSize) => {
@@ -86,10 +85,25 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
         return false;
     }
 
+    // check if the board is full
     const isBoardFull = () => {
-        return board.getBoard().every( row => {
-            row.every( cell => cell.getValue() !== null);
-        })
+        return board.getBoard().every( row =>
+            row.every( cell => cell.getValue() !== null)
+        );
+    }
+
+    const movesAvailable = () => {
+        const moves = [];
+
+        board.getBoard().forEach((row, r) => {
+            row.forEach((col, c) => {
+                if (col.getValue() === null) {
+                    moves.push([r, c]);
+                }
+            })
+        });
+
+        return moves;
     }
 
     // check if someone won
@@ -97,6 +111,7 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
         const token = currentPlayer.token;
         const boardSize = board.getBoard().length;
 
+        const grid = board.getBoard();
         const directions = [[0,1], [1,0], [1,1], [1,-1]];
 
         for (const [dx, dy] of directions) {
@@ -106,7 +121,7 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
             for (let i = 1; i < boardSize; ++i) {
                 const r = row+i*dx, c = col+i*dy;
 
-                if (isValidCell(r, c, boardSize) && board.getBoard()[r][c].getValue() === token) {
+                if (isValidCell(r, c, boardSize) && grid[r][c].getValue() === token) {
                     count++;
                 } else break;
             }
@@ -115,7 +130,7 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
             for (let i = 1; i < boardSize; ++i) {
                 const r = row-i*dx, c = col-i*dy;
 
-                if (isValidCell(r, c, boardSize) && board.getBoard()[r][c].getValue() === token) {
+                if (isValidCell(r, c, boardSize) && grid[r][c].getValue() === token) {
                     count++;
                 } else break;
             }
@@ -136,17 +151,17 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
             console.log('Cannot play this move, try another one.');
             return;
         }
-        
-        const res = checkWin(row, col);
 
-        if (!res) {
-            switchPlayer();
-            board.printBoard(); 
-            log();  
-        } else {
+        if (checkWin(row, col)) {
             board.printBoard();
-            alert(`${currentPlayer.name} won!.`);
+            return {winner : currentPlayer};
+        } else if (isBoardFull()) {
+            return {draw: true};
         }
+
+        switchPlayer();
+        board.printBoard(); 
+        log(); 
     }
 
     const reset = () => {
@@ -160,6 +175,7 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
     return {
         playRound,
         reset,
+        movesAvailable
     };
 }
 

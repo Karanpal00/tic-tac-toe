@@ -1,6 +1,46 @@
+@font-face {
+    font-family: 'Brushlet';
+    src: url('./fonts/BrushletRegular.woff') format('woff2'),
+        url('./fonts/BrushletRegular.woff2') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Caster Street';
+    src: url('./fonts/CasterStreetRegular.woff') format('woff2'),
+        url('./fonts/CasterStreetRegular.woff2') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+@font-face {
+    font-family: 'Maximus';
+    src: url('./fonts/MaximusRegular.woff') format('woff2'),
+        url('./fonts/MaximusRegular.woff2') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Quantro Sport';
+    src: url('./fonts/QuantroSportRegular.woff') format('woff2'),
+        url('./fonts/QuantroSportRegular.woff2') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+    font-family: Brushlet, Caster Street, Maximus, Quantro Sport;
 }
 
 button {
@@ -10,21 +50,81 @@ button {
 }
 
 body {
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
+    justify-content: space-evenly;
     align-items: center;
     text-align: center;
+    user-select: none;
+}
+
+h1 {
+    font-size: clamp(1.4rem, min(5vw, 5vh), 3rem);
 }
 
 #game-board {
     min-width: min(70vw, 70vh);
     min-height: min(70vw, 70vh);
     display: grid;
-    grid-template-columns: repeat(3, minmax(90px, 1fr));
-    grid-template-rows: repeat(3, minmax(90px, 1fr));
-    gap:10px;
+    grid-template-columns: repeat(3, minmax(50px, 1fr));
+    grid-template-rows: repeat(3, minmax(50px, 1fr));
+    position: relative;
 }
 
 #game-board>div {
-    border:1px solid black;
+    cursor: pointer;
+    font-size: clamp(3rem, min(8vh, 8vw), 5rem);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+div[data-index ='0'] {
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+div[data-index ='1'] {
+    border-bottom: 1px solid black;
+}
+
+div[data-index ='2'] {
+    border-left: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+div[data-index ='3'] {
+    border-right: 1px solid black;
+}
+
+div[data-index ='5'] {
+    border-left: 1px solid black;
+}
+
+div[data-index ='6'] {
+    border-top: 1px solid black;
+    border-right: 1px solid black;
+}
+
+div[data-index ='7'] {
+    border-top: 1px solid black;
+}
+
+div[data-index ='8'] {
+    border-top: 1px solid black;
+    border-left: 1px solid black;
+}
+
+#winBoard {
+    display: none;
+    font-size: clamp(2rem, min(8vh, 8vw), 4rem);
+}
+
+button {
+    font-family: inherit;
+    border-radius: 8px;
+    background: steelblue;
+    padding: 0.5rem 2rem;
+    font-size: clamp(0.875rem, min(2vh, 2vw), 1.4rem);
 }

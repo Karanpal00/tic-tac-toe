@@ -179,8 +179,14 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
 function DomController () {
     const gameContainer = document.querySelector('#game-board');
     const domGameBoard = document.querySelectorAll('.cell');
-    const winBoard = document.querySelector('#winBoard');
+    const winBoard = document.querySelector('#win-Board');
     const restartBtn = document.querySelector('#restart-btn');
+    const modal = document.querySelector('#get-player-info');
+    const form = document.querySelector('form');
+    const p2pRadioBtn = document.querySelector('#p2p');
+    const p2bRadioBtn = document.querySelector('#p2b');
+    const p2pInput = document.querySelector('.p2p')
+    const p2bInput = document.querySelector('.p2b');
 
     const game = GameController();
 
@@ -229,8 +235,21 @@ function DomController () {
     const addEvents = () => {
         gameContainer.addEventListener('click', dropToken);
         restartBtn.addEventListener('click', uiReset);
+        p2pRadioBtn.addEventListener('change', function() {
+            if(this.checked) {
+                p2pInput.style.display = 'flex';
+                 p2bInput.style.display = 'none';
+            }
+        });
+        p2bRadioBtn.addEventListener('change', function() {
+            if(this.checked) {
+                p2bInput.style.display = 'block';
+                p2pInput.style.display = 'none';
+            }
+        });
     }    
 
+    modal.showModal();
     addEvents();
     printBoard();
 }   

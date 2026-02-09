@@ -43,6 +43,10 @@
     font-family: Brushlet, Caster Street, Maximus, Quantro Sport;
 }
 
+input, button {
+    outline: none;
+}
+
 button {
     cursor: pointer;
     border: none;
@@ -63,6 +67,40 @@ h1 {
     font-size: clamp(1.4rem, min(5vw, 5vh), 3rem);
 }
 
+#info {
+    min-width: min(60vw, 60vh);
+    font-size: clamp(1.4rem, min(4vw, 4vh), 2.5rem);
+    display: none;
+    justify-content: space-between;
+}
+
+dialog {
+    margin: auto;
+    min-height: min(30vh, 30vw);
+    min-width: min(30vh, 30vw);
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    padding: 1rem;
+    user-select: none;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap:0.5rem;
+}
+
+form>div {
+    display: none;
+    flex-direction: column;
+    gap:0.5rem;
+}
+
+form input {
+    border-radius: 6px;
+    border: 1px solid black;
+}
 #game-board {
     min-width: min(70vw, 70vh);
     min-height: min(70vw, 70vh);
@@ -116,7 +154,7 @@ div[data-index ='8'] {
     border-left: 1px solid black;
 }
 
-#winBoard {
+#win-Board {
     display: none;
     font-size: clamp(2rem, min(8vh, 8vw), 4rem);
 }

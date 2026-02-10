@@ -70,7 +70,7 @@ h1 {
 #info {
     min-width: min(60vw, 60vh);
     font-size: clamp(1.4rem, min(4vw, 4vh), 2.5rem);
-    display: none;
+    display: flex;
     justify-content: space-between;
 }
 
@@ -154,7 +154,7 @@ div[data-index ='8'] {
     border-left: 1px solid black;
 }
 
-#win-Board {
+#win-screen {
     display: none;
     font-size: clamp(2rem, min(8vh, 8vw), 4rem);
 }

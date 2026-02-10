@@ -58,16 +58,22 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
 
     const players = [{
         name:playerOneName,
-        token:'X'
+        token:'X',
+        score: 0
     },
     {
         name:playerTwoName,
-        token:'O'
+        token:'O',
+        score: 0
     }];
 
     const board = GameBoard(boardSize);
     
     let currentPlayer = players[0];
+
+
+    const getScores = () => players.map((p) => p.score);
+    const getCurrentPlayer = () => currentPlayer;
 
     // switch player
     const switchPlayer = () => {
@@ -112,9 +118,8 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
     // check if someone won
     const checkWin = (row, col) => {
         const token = currentPlayer.token;
-        const boardSize = board.getBoard().length;
-
         const grid = board.getBoard();
+        const boardSize = grid.length;
         const directions = [[0,1], [1,0], [1,1], [1,-1]];
 
         for (const [dx, dy] of directions) {
@@ -144,14 +149,16 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
     }
 
     //play the game round 
-    const playMove = (row, col) => {
+    const playRound = (row, col) => {
         if (!board.markToken(row, col, currentPlayer.token)) {
             return null;
         }
 
         if (checkWin(row, col)) {
+            currentPlayer.score++;
             return {winner : currentPlayer};
         } else if (isBoardFull()) {
+            players[0].score++, players[1].score++;
             return {draw: true};
         }
 
@@ -168,7 +175,9 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
 
     return {
         boardSize,
-        playMove,
+        getCurrentPlayer,
+        getScores,
+        playRound,
         reset,
         movesAvailable,
         getBoardValues,
@@ -179,62 +188,114 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
 function DomController () {
     const gameContainer = document.querySelector('#game-board');
     const domGameBoard = document.querySelectorAll('.cell');
-    const winBoard = document.querySelector('#win-Board');
+    const winScreen = document.querySelector('#win-screen');
     const restartBtn = document.querySelector('#restart-btn');
+
+    const player1Name = document.querySelector('.player1-info');   
+    const player1Score = document.querySelector('.score-1');
+    const player2Name = document.querySelector('.player2-info');   
+    const player2Score = document.querySelector('.score-2');
+
     const modal = document.querySelector('#get-player-info');
     const form = document.querySelector('form');
     const p2pRadioBtn = document.querySelector('#p2p');
     const p2bRadioBtn = document.querySelector('#p2b');
     const p2pInput = document.querySelector('.p2p')
     const p2bInput = document.querySelector('.p2b');
+    const modalCancelBtn = document.querySelector('#cancel-btn');
 
-    const game = GameController();
+    let isGameOver = null, game = null;
 
-    let isGameOver = null;
+    const getPlayerInfo = () => {
+        const data = new FormData(form);
+        const formData = Object.fromEntries(data.entries());        
 
-    const gameOver = () => {
+        if (formData.game_mode === 'p2b') {
+            player1Name.textContent = formData.player1_p2b;
+            player2Name.textContent = 'BOT';
+        } else {
+            player1Name.textContent = formData.player1;
+            player2Name.textContent = formData.player2;
+        }
+
+        player1Score.textContent = '0';
+        player2Score.textContent = '0';
+        game = GameController(player1Name.textContent, player2Name.textContent);
+        printBoard();
+    }
+
+    const handleRoundEnd = () => {
         if (isGameOver === null) {
             return;
         }   
 
         if ('winner' in isGameOver) {
-            winBoard.textContent = `${isGameOver.winner.name}  Won!`;
+            winScreen.textContent = `${isGameOver.winner.name}  Won!`;
 
         } else {
-            winBoard.textContent = `It's a Draw Fuck both of you!`;
+            winScreen.textContent = `It's a Draw Fuck both of you!`;
         }
 
         gameContainer.style.display = 'none';
-        winBoard.style.display = 'block';
+        winScreen.style.display = 'block';
+
+        let scores = game.getScores();
+        if ((scores[0] >= 3 || scores[1] >= 3 ) && scores[0] !== scores[1]) {
+            player1Score.textContent = scores[0];
+            player2Score.textContent = scores[1];
+            return;
+            
+        } 
+        setTimeout(updateScreenRound, 2500);
+    }
+    const updateScreenRound = () => {
+        gameContainer.style.display = 'grid';
+        game.reset();
+        printBoard();
+        winScreen.style.display = 'none';
+        let scores = game.getScores();
+        player1Score.textContent = scores[0];
+        player2Score.textContent = scores[1];
     }
 
     const uiReset = () => {
+        modal.showModal();
         game.reset();
         gameContainer.style.display = 'grid';
-        winBoard.style.display = 'none';
+        winScreen.style.display = 'none';
         printBoard();        
     }
 
-     const printBoard = () => {
+    const printBoard = () => {
         const gridValues = game.getBoardValues();
         for(let i = 0; i < domGameBoard.length; ++i) {
-            domGameBoard[i].textContent = gridValues[i];
+            domGameBoard[i].textContent = gridValues[i] ?? '';
         }
     }
 
     const dropToken = (e) => {
+        if (isGameOver) return;
+        if (!game) return;
+        if(!e.target.matches('.cell')) return;
         const index1D = e.target.dataset.index;
         const row = Math.floor(index1D/game.boardSize);
         const col = index1D%game.boardSize;
 
-        isGameOver = game.playMove(row, col);
-        gameOver();
+        isGameOver = game.playRound(row, col);
+        handleRoundEnd();
         printBoard();
     }   
   
     const addEvents = () => {
         gameContainer.addEventListener('click', dropToken);
         restartBtn.addEventListener('click', uiReset);
+        modal.addEventListener('close', ()=> {
+            if(modal.returnValue === 'save') 
+                getPlayerInfo();
+            form.reset();
+            p2bInput.style.display = 'none';
+            p2pInput.style.display = 'none';
+        })
         p2pRadioBtn.addEventListener('change', function() {
             if(this.checked) {
                 p2pInput.style.display = 'flex';
@@ -247,11 +308,13 @@ function DomController () {
                 p2pInput.style.display = 'none';
             }
         });
+        modalCancelBtn.addEventListener('click', () => {
+            modal.close();
+        })
     }    
 
     modal.showModal();
     addEvents();
-    printBoard();
 }   
 
 const dom = DomController();
@@ -264,4 +327,5 @@ Todo :-
 3.Add functionality to restart the game.
     a.Once the restart button is clicked then the game should go to the modal.
 4.Add tic-tac-toe bot.
+5.Add 5 round, whoever wins 3 first wins.
 */

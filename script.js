@@ -101,7 +101,7 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
     }
 
     // moves to feed the bot
-    const movesAvailable = () => {
+    const getAvailableMoves = () => {
         const moves = [];
 
         board.getBoard().forEach((row, r) => {
@@ -179,9 +179,26 @@ function GameController(playerOneName="Player1", playerTwoName="player2") {
         getScores,
         playRound,
         reset,
-        movesAvailable,
+        getAvailableMoves,
         getBoardValues,
     };
+}
+
+// tic-tac-toe Bot
+
+function BotController (game) {
+    const makeMove = () => {
+        const moves = game.getAvailableMoves();
+        if (moves.length == 0) return null;
+
+        const index = Math.floor(Math.random()*moves.length);
+
+        const [r,c] = moves[index];
+
+        return game.playRound(r, c);
+    }
+
+    return {makeMove};
 }
 
 // Dom controller function factory
@@ -205,6 +222,10 @@ function DomController () {
     const modalCancelBtn = document.querySelector('#cancel-btn');
 
     let isGameOver = null, game = null;
+    let bot = null;
+    let isBotGame = false;
+    let inputLocked = false;
+
 
     const getPlayerInfo = () => {
         const data = new FormData(form);
@@ -213,14 +234,21 @@ function DomController () {
         if (formData.game_mode === 'p2b') {
             player1Name.textContent = formData.player1_p2b;
             player2Name.textContent = 'BOT';
+            isBotGame = true;
         } else {
             player1Name.textContent = formData.player1;
             player2Name.textContent = formData.player2;
+            isBotGame = false;
         }
 
         player1Score.textContent = '0';
         player2Score.textContent = '0';
+
         game = GameController(player1Name.textContent, player2Name.textContent);
+        if (isBotGame) {
+            bot = BotController(game);
+        }
+
         printBoard();
     }
 
@@ -228,7 +256,6 @@ function DomController () {
         if (isGameOver === null) {
             return;
         }   
-
         if ('winner' in isGameOver) {
             winScreen.textContent = `${isGameOver.winner.name}  Won!`;
 
@@ -244,10 +271,10 @@ function DomController () {
             player1Score.textContent = scores[0];
             player2Score.textContent = scores[1];
             return;
-            
         } 
         setTimeout(updateScreenRound, 2500);
     }
+
     const updateScreenRound = () => {
         gameContainer.style.display = 'grid';
         game.reset();
@@ -256,6 +283,8 @@ function DomController () {
         let scores = game.getScores();
         player1Score.textContent = scores[0];
         player2Score.textContent = scores[1];
+        isGameOver = null;
+        inputLocked = false;
     }
 
     const uiReset = () => {
@@ -263,7 +292,9 @@ function DomController () {
         game.reset();
         gameContainer.style.display = 'grid';
         winScreen.style.display = 'none';
-        printBoard();        
+        printBoard();      
+        isGameOver = null;
+        inputLocked = false;  
     }
 
     const printBoard = () => {
@@ -277,13 +308,23 @@ function DomController () {
         if (isGameOver) return;
         if (!game) return;
         if(!e.target.matches('.cell')) return;
+        if (inputLocked) return;
         const index1D = e.target.dataset.index;
         const row = Math.floor(index1D/game.boardSize);
         const col = index1D%game.boardSize;
 
         isGameOver = game.playRound(row, col);
-        handleRoundEnd();
         printBoard();
+        handleRoundEnd();
+    
+        if (!isGameOver && isBotGame && game.getCurrentPlayer().name === 'BOT') {
+            setTimeout(() => {
+                isGameOver = bot.makeMove();
+                printBoard();
+                handleRoundEnd();
+                inputLocked = false;
+            }, 400);
+        }
     }   
   
     const addEvents = () => {

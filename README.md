@@ -24,7 +24,7 @@ The project focuses on practicing:
 
 ## Live Demo
 
-👉 [Play the Game Here](https://karanpal00.github.io/tic-tac-toe)
+- [Play the Game Here](https://karanpal00.github.io/tic-tac-toe)
 
 ---
 
